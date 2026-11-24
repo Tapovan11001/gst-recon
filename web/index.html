@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GST Recon</title>
+<meta name="description" content="Match your purchase register against GSTR-2B. See which input tax credit is at risk, and paste the result straight into Google Sheets.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header class="top">
+    <div>
+      <h1>GST Recon</h1>
+      <p class="tag">Match your purchase register against GSTR-2B. See which input tax credit is at risk before you file GSTR-3B.</p>
+    </div>
+    <div class="settings">
+      <label>Your GSTIN <input id="buyer" spellcheck="false" maxlength="15"></label>
+      <label>Tolerance (₹) <input id="tol" type="number" min="0" step="1" value="1"></label>
+    </div>
+  </header>
+
+  <main class="page">
+    <details class="inputs" id="inputs">
+      <summary>Data: <span id="data-line"></span> <span class="edit">Edit or paste your own</span></summary>
+      <div class="two">
+        <label>Purchase register <span class="muted">from Tally, Busy or your sheet</span>
+          <textarea id="books" spellcheck="false"></textarea>
+        </label>
+        <label>GSTR-2B <span class="muted">B2B section, from the GST portal</span>
+          <textarea id="g2b" spellcheck="false"></textarea>
+        </label>
+      </div>
+      <p class="fine">Paste CSV, or copy rows straight from Excel or Google Sheets. It needs columns for GSTIN, invoice number, date and taxable value, plus IGST/CGST/SGST. Column names are matched loosely. <button type="button" id="sample" class="link">Reset to sample data</button></p>
+      <p id="err" class="err" role="alert" hidden></p>
+    </details>
+
+    <section class="kpis" aria-label="Summary">
+      <div class="kpi"><span>ITC in your books</span><b id="k-books"></b></div>
+      <div class="kpi"><span>ITC in GSTR-2B</span><b id="k-2b"></b></div>
+      <div class="kpi risk"><span>ITC at risk</span><b id="k-risk"></b><small>in books, not backed by 2B</small></div>
+      <div class="kpi"><span>Matched</span><b id="k-match"></b><small id="k-match-of"></small></div>
+    </section>
+
+    <div class="bar">
+      <div class="filters" role="group" aria-label="Filter by status" id="filters"></div>
+      <div class="out">
+        <button type="button" id="copy" class="primary">Copy for Google Sheets</button>
+        <button type="button" id="csv">Download CSV</button>
+      </div>
+    </div>
+    <p id="copy-note" class="fine" aria-live="polite"></p>
+
+    <div class="table-wrap">
+      <table id="table">
+        <thead><tr><th>Status</th><th>Supplier</th><th>Invoice</th><th class="n">Taxable</th><th class="n">Tax</th><th class="n">At risk</th><th>What to do</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+
+    <section class="mail" aria-labelledby="mail-h">
+      <h2 id="mail-h">Supplier follow-ups</h2>
+      <p>Claude writes one email per supplier who needs to file or fix something. Each email is checked before it's kept: it has to name every invoice it's about, and any rupee amount in it has to match the data.</p>
+      <div class="row">
+        <input id="api-key" type="password" autocomplete="off" placeholder="Anthropic API key (sk-ant-...)" spellcheck="false" aria-label="Anthropic API key">
+        <button type="button" id="draft" class="primary">Write follow-up emails</button>
+      </div>
+      <p class="fine">Your key stays in this tab and goes only to api.anthropic.com.</p>
+      <p id="mail-status" class="status" aria-live="polite"></p>
+      <div id="emails"></div>
+    </section>
+  </main>
+
+  <section class="how" aria-label="How it works">
+    <h2>How it works</h2>
+    <p>Every month, a business can only claim back the GST it paid on purchases if its suppliers have reported those same bills to the government. The government's list is called GSTR-2B. GST Recon puts your purchase records next to that list and pairs them up, even when an invoice number is written differently. It shows which bills your supplier never reported, where the amounts differ, and where a GSTIN has a typo. It adds up how much tax credit is at risk. You can paste the result into Google Sheets, and Claude writes a polite follow-up email to each supplier.</p>
+  </section>
+
+  <footer class="foot">
+    <p>All matching runs in your browser. Nothing is uploaded unless you ask Claude for emails, and then only the issue list is sent.</p>
+  </footer>
+<span class="made-by">Created by Aarov Makhija</span>
+<script type="module" src="./main.ts"></script>
+</body>
+</html>
